@@ -1,8 +1,8 @@
 ---
-#ipoc自动部署配置,elk
+#bimap自动部署配置,elk
 #wudi 20170216
-- hosts: bimap 
-  #gather_facts: False
+- hosts: all 
+  gather_facts: False
   tasks:
       - name : create-dir
         file : path="{{homedir}}/{{bimapuser}}/{{item}}" state=directory mode=0755
@@ -20,7 +20,8 @@
                 - "elasticsearch-{{elkVersion}}"
                 - "kibana-{{elkVersion}}"
                 - "logstash-{{elkVersion}}"
-                - "node-{{nodeVersion}}" - "elasticsearch-head"
+                - "node-{{nodeVersion}}" 
+                - "elasticsearch-head"
         when:
             - "'elk' in group_names"
         tags:
