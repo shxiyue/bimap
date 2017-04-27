@@ -3,10 +3,10 @@
 ## 使用方法
 1. 上传所有介质到部署服务器
 2. 安装ansible
-a. 使用yum,apt-get等安装ansible，或
-b. 使用./depkit目录中的ansible-2.2.1.0-1.el7.noarch.rpm　for centos7安装，
+    2.1. 使用yum,apt-get等安装ansible，或
+    2.2. 使用./depkit目录中的ansible-2.2.1.0-1.el7.noarch.rpm　for centos7安装，
 
-###　配置文件 hostlist
+## 配置文件 hostlist 说明
 此文件是ansible的host文件，主要定义如下：
 - [elk]  group ，elk服务器列表，每个host必须包含esname用于设定elasticSearch nodename,这个组里的主机将会部署elk基础组件
 - [redis] group ,redis服务器列表，一台或多台主机，可以和elk group
