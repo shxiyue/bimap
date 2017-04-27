@@ -1,0 +1,15 @@
+fields:
+  host: 84.239.97.141
+  level: debug
+  review: 1
+filebeat.prospectors:
+- document_type: message
+  input_type: log
+  paths: /var/log/messages
+- document_type: message
+  input_type: log
+  paths: /var/log/secure
+output.redis:
+  hosts:
+  - 84.239.97.140
+  key: bimap_%{[type]:fallback}

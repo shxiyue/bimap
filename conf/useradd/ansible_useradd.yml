@@ -1,0 +1,17 @@
+---
+#user add
+#wudi 20170216
+- hosts: all
+  #gather_facts: False
+  vars:
+  tasks:
+      - name : adduser
+        user : name={{item}}
+        with_items:
+                - "{{user}}"
+
+      - name : createdirs
+        file : path="/home/{{item[0]}}/{{item[1]}}" state=directory mode=0755 owner={{item[0]}}
+        with_nested:
+                - "{{user}}"
+                - "{{dirs}}"

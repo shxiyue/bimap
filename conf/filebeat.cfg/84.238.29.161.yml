@@ -1,0 +1,15 @@
+fields:
+  host: 84.238.29.161
+  level: debug
+  review: 1
+filebeat.prospectors:
+- document_type: was
+  input_type: log
+  paths: /washome/IBM/WebSphere/AppServer/profiles/Custom01/logs/A05Server/SystemOut.log
+- document_type: message
+  input_type: log
+  paths: /var/log/messages
+output.redis:
+  hosts:
+  - 84.239.97.140
+  key: bimap_%{[type]:fallback}

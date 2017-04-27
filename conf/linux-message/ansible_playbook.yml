@@ -1,0 +1,22 @@
+---
+#get linux-message-log
+#wudi 20170216
+- hosts: all
+  #gather_facts: False
+  vars:
+        srcbasedir: "~/bimap"
+        desthomedir: "~"
+        fileBeatVersion: "5.3.0"
+  tasks:
+      - name : put-kit
+        copy: src={{ srcbasedir }}/depkit/{{item}}.tar.gz dest={{ desthomedir }}/ mode="u=rwx"
+        with_items:
+                - "filebeat-{{fileBeatVersion}}"
+        tags:
+            - putkit
+
+      - name : unzip
+        command : tar -zxf {{desthomedir}}/{{item}}.tar.gz -C {{desthomedir}}/
+        with_items:
+                - "filebeat-{{fileBeatVersion}}"
+

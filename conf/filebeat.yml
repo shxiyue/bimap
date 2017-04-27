@@ -1,0 +1,7 @@
+fields:
+  level: debug
+  review: 1
+
+output.redis:
+  hosts: ["84.239.97.140"]
+  key: "bimap"

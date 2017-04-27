@@ -1,0 +1,6 @@
+SSHTYPE disconnect|Accepted|error: PAM:
+SSH_USER for %{USERNAME:user}
+SSH_SOURCE from %{IPORHOST:source_ip}
+SSH_PORT port %{NUMBER:port}
+SSH_ACTYPE keyboard-interactive/pam|publickey|Authentication failure|User not known to the underlying authentication module
+SSH_IUSER user %{USERNAME:iuser}

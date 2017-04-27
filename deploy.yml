@@ -1,0 +1,104 @@
+---
+#ipoc自动部署配置,elk
+#wudi 20170216
+- hosts: bimap 
+  #gather_facts: False
+  tasks:
+      - name : create-dir
+        file : path="{{homedir}}/{{bimapuser}}/{{item}}" state=directory mode=0755
+        with_items:
+                - "{{dirs}}"
+        when:
+            - "'elk' in group_names"
+        tags:
+            - createdir
+ 
+      - name : put-kit
+        copy: src={{ srcbasedir }}/depkit/{{item}}.tar.gz dest={{homedir}}/{{bimapuser}}/bimap/depkit mode="u=rwx"
+        with_items:
+                - "jdk-{{jdkVersion}}"
+                - "elasticsearch-{{elkVersion}}"
+                - "kibana-{{elkVersion}}"
+                - "logstash-{{elkVersion}}"
+                - "node-{{nodeVersion}}" - "elasticsearch-head"
+        when:
+            - "'elk' in group_names"
+        tags:
+            - putkit
+
+      - name : unzip
+        unarchive : 
+            src: "{{homedir}}/{{bimapuser}}/bimap/depkit/{{item}}.tar.gz"
+            dest : "{{homedir}}/{{bimapuser}}/bimap/opt"
+            remote_src: True
+        with_items:
+                - "jdk-{{jdkVersion}}"
+                - "elasticsearch-{{elkVersion}}"
+                - "kibana-{{elkVersion}}"
+                - "logstash-{{elkVersion}}"
+                - "node-{{nodeVersion}}"
+                - "elasticsearch-head"
+        when:
+            - "'elk' in group_names"
+
+      - name : upload-config
+        template : src={{srcbasedir}}/depscript/{{item.file}} dest={{homedir}}/{{bimapuser}}/bimap/{{item.dir}} mode=0755
+        with_items:
+            - { file: 'elasticsearch.yml', dir: 'opt/elasticsearch-{{elkVersion}}/config' }
+            - { file: 'elasticsearch',     dir: 'opt/elasticsearch-{{elkVersion}}/bin' }
+            - { file: 'es_init_script',    dir: 'bin' }
+            - { file: 'kibana.yml',        dir: 'opt/kibana-{{elkVersion}}/config' }
+            - { file: 'setbimapenv.sh',    dir: 'bin' }
+            - { file: 'kibana_init_script',dir: 'bin' }
+            - { file: 'eshead_start.sh',   dir: 'bin' }
+            - { file: 'Gruntfile.js',      dir: 'opt/elasticsearch-head' }
+            - { file: 'schema.js',         dir: 'opt/kibana-{{elkVersion}}/src/server/config' }
+        when:
+            - "'elk' in group_names"
+
+#--------------start redis config --------------------------------                        
+      - name : put-redis
+        copy: src={{ srcbasedir }}/depkit/{{item}}.tar.gz dest={{homedir}}/{{bimapuser}}/bimap/depkit mode="u=rwx"
+        with_items:
+                - "redis-{{redisVersion}}"
+        when:
+                - (ansible_distribution == 'RedHat' or ansible_distribution == 'CentOS') and (ansible_distribution_major_version == "7" or ansible_distribution_major_version == "6")
+                - "'redis' in group_names"
+        tags:
+            - redis
+
+      - name : unzip-redis
+        unarchive : 
+            src: "{{homedir}}/{{bimapuser}}/bimap/depkit/{{item}}.tar.gz"
+            dest : "{{homedir}}/{{bimapuser}}/bimap/opt"
+            remote_src: True
+        with_items:
+                - "redis-{{redisVersion}}"
+        when :
+                - "'redis' in group_names"
+        tags:
+            - redis
+
+      - name : copy-redis-conf
+        template: src={{ srcbasedir }}/depscript/redis.conf dest={{homedir}}/{{bimapuser}}/bimap/conf/redis_{{redisport}}.conf mode="u=rwx" 
+        when :
+                - "'redis' in group_names"
+        tags:
+            - redis
+
+      - name : copy-redis-init
+        template: src={{ srcbasedir }}/depscript/redis_init_script dest={{homedir}}/{{bimapuser}}/bimap/bin/init_redis mode=0755 
+        #become : true
+        #become_method: su
+        when :
+                - "'redis' in group_names"
+        tags:
+            - redis
+
+      - name : make-redis
+        make:
+          chdir: "{{homedir}}/{{bimapuser}}/bimap/opt/redis-{{redisVersion}}"
+        when :
+                - "'redis' in group_names"
+        tags:
+            - redis

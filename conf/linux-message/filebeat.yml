@@ -1,0 +1,20 @@
+filebeat.prospectors:
+- input_type: log
+  paths:
+    - /var/log/messages
+  document_type : linux_message 
+
+- input_type: log
+  paths:
+    - /home/appmon/tmpfile
+  document_type : tmp 
+
+fields:
+  host: 84.239.97.141
+  level: debug
+  review: 1
+
+output.redis:
+  hosts: ["84.239.97.140"]
+  key: "linux-message"
+  

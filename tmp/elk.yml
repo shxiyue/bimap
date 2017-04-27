@@ -1,0 +1,136 @@
+---
+#ipoc自动部署配置,elk
+#wudi 20170216
+- hosts: all
+  #gather_facts: False
+  vars:
+        srcbasedir: "/home/wudi/ipoc/bitmap"
+        desthomedir: "/home/bitmap/bitmap" 
+        redisVersion: "3.2.7"
+        elkVersion: "5.1.1"
+        esVersion: "5.1.1"
+        logstashVersion: "5.1.1"
+        kibanaVersion: "5.1.1"
+        jdkVersion: "1.8.0_111"
+        killnmon: True  #是否kill已有的nmon进程
+        startnmon: True  #是否立即启动nmon捕获数据到当天24点
+  remote_user: bitmap
+  tasks:
+      - name : create-dir
+        file : path={{item}} state=directory mode=0755
+        with_items:
+                - "{{ desthomedir }}"
+                - "{{ desthomedir }}/opt"
+                - "{{ desthomedir }}/conf"
+                - "{{ desthomedir }}/depkit"
+
+      - name : put-jdk
+        copy: src={{ srcbasedir }}/depkit/{{item}}.tar.gz dest={{ desthomedir }}/depkit mode="u=rwx"
+        with_items:
+                - "jdk-{{jdkVersion}}"
+        when: logstash or elasticsearch or kibana
+
+      - name : unzip-jdk
+        command : tar -zxf {{desthomedir}}/depkit/{{item}}.tar.gz -C {{desthomedir}}/opt
+        with_items:
+                - "jdk-{{jdkVersion}}"
+        when: logstash or elasticsearch or kibana
+#--------------start redis config --------------------------------                  
+      - name : put-redis
+        copy: src={{ srcbasedir }}/depkit/{{item}}.tar.gz dest={{ desthomedir }}/depkit mode="u=rwx"
+        with_items:
+                - "redis-{{redisVersion}}"
+        when: 
+                - redis
+                - (ansible_distribution == 'RedHat' or ansible_distribution == 'CentOS') and ansible_distribution_major_version == "7"
+
+
+      - name : unzip-redis
+        command : tar -zxf {{desthomedir}}/depkit/{{item}}.tar.gz -C {{desthomedir}}/opt
+        with_items:
+                - "redis-{{redisVersion}}"
+        when : redis
+
+
+      - name : make-redis
+        make:
+          chdir: "{{desthomedir}}/opt/redis-{{redisVersion}}"
+        when : redis
+
+
+      - name : copy-redis-conf
+        template: src={{ srcbasedir }}/depscript/redis.conf dest={{desthomedir}}/conf/redis_{{redisport}}.conf mode="u=rwx"
+        when : redis
+
+
+      - name : copy-redis-init
+        template: src={{ srcbasedir }}/depscript/redis_init_script dest=/etc/rc.d/init.d/redis mode=0755
+        become : true
+        become_method: su
+        when : redis
+       
+#      - name : add-redis-service
+#        command : chkconfig --add redis
+#        when : type == 'redis'
+
+      - name: enable-redis-supervisord-service
+        service: name=redis enabled=yes
+        become : true
+        become_method: su
+        when : redis
+
+      - name: start redis
+        service: name=redis state=started
+        become : true
+        become_method: su
+        when : redis
+#----------------elasticsearch config ----------------------------------
+
+      - name : put-es
+        copy: src={{ srcbasedir }}/depkit/{{item}}.tar.gz dest={{ desthomedir }}/depkit mode="0755"
+        with_items:
+                - "elasticsearch-{{elkVersion}}"
+        when: 
+                - elasticsearch
+                - (ansible_distribution == 'RedHat' or ansible_distribution == 'CentOS') and ansible_distribution_major_version == "7"
+
+      - name : unzip-elasticsearch
+        command : tar -zxf {{desthomedir}}/depkit/{{item}}.tar.gz -C {{desthomedir}}/opt
+        with_items:
+                - "elasticsearch-{{elkVersion}}"
+        when : elasticsearch
+
+      - name : put-esconfig
+        template: src={{ srcbasedir }}/depscript/{{item}} dest={{desthomedir}}/opt/elasticsearch-{{elkVersion}}/config mode=0755
+        with_items:
+                - "elasticsearch.yml"
+        when: 
+                - elasticsearch
+
+      - name : put-esscript
+        template: src={{ srcbasedir }}/depscript/{{item}} dest={{desthomedir}}/opt/elasticsearch-{{elkVersion}}/bin mode=0755
+        with_items:
+                - "elasticsearch"
+                - "es_init_script"
+        when: 
+                - elasticsearch
+
+      - name : copy-es-init
+        template: src={{ srcbasedir }}/depscript/{{item}} dest=/etc/rc.d/init.d/es mode=0755
+        with_items:
+                - "es_init_script"
+        become : true
+        become_method: su
+        when : elasticsearch
+
+      - name: enable-es-supervisord-service
+        service: name=es enabled=yes
+        become : true
+        become_method: su
+        when : elasticsearch
+
+      - name: start-es
+        service: name=es state=started
+        become : true
+        become_method: su
+        when : elasticsearch

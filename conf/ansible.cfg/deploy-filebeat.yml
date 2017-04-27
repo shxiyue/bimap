@@ -1,0 +1,85 @@
+---
+#自动部署filebeat
+#wudi 20170216
+- hosts: all
+  #gather_facts: False
+  remote_user: appmon
+  tasks:
+      - name : cdir
+        file : path={{aghome}}/{{ansible_ssh_user}}/{{item}} state=directory mode=0755
+        with_items:
+                - "{{agdirs}}"
+        tags:
+            - setup
+
+      - name : put-kit
+        copy: src={{ srcbasedir }}/depkit/{{item}}.tar.gz dest={{aghome}}/{{ansible_ssh_user}}/bimap/depkit mode="u=rwx"
+        with_items:
+                - "filebeat-{{filebeatVersion}}"
+        #when: logstash or elasticsearch or kibana
+        tags:
+            - setup
+
+      - name : unzip
+        unarchive:
+            src: "{{aghome}}/{{ansible_ssh_user}}/bimap/depkit/{{item}}.tar.gz"
+            dest: "{{aghome}}/{{ansible_ssh_user}}/bimap/opt"
+            remote_src: True
+        #command : tar -zxf {{aghome}}/{{ansible_ssh_user}}/bimap/depkit/{{item}}.tar.gz -C {{aghome}}/{{ansible_ssh_user}}/bimap/opt
+        with_items:
+                - "filebeat-{{filebeatVersion}}"
+        tags:
+            - setup
+        #when: logstash or elasticsearch or kibana
+
+      - name : putscript
+        template: src={{ srcbasedir }}/depscript/filebeat_init.sh dest={{aghome}}/{{ansible_ssh_user}}/bimap/bin mode=0755
+        tags:
+            - setup
+
+      - name : link
+        file : 
+            src: "{{aghome}}/{{ansible_ssh_user}}/bimap/opt/filebeat-{{filebeatVersion}}/filebeat"
+            dest: "{{aghome}}/{{ansible_ssh_user}}/bimap/bin/filebeat"
+            state: link
+        tags:
+            - setup
+
+      - name : chkfbrun
+        raw: ps -ef | grep "filebeat -c"  | grep -v "grep" 
+        register: fbrun
+        ignore_errors: True
+        tags: 
+            - reset
+            - restart
+
+      - name : killfb
+        raw : ps -ef | grep "filebeat -c" | grep -v "grep" | awk '{print $2}' | xargs kill -TERM
+        when : fbrun.stdout
+        tags: 
+            - reset
+            - restart
+
+      - name : clearregistry
+        #command: rm -rf {{aghome}}/{{ansible_ssh_user}}/bimap/opt/filebeat-{{filebeatVersion}}/data/registry
+        file:
+            path: "{{aghome}}/{{ansible_ssh_user}}/bimap/opt/filebeat-{{filebeatVersion}}/data/registry"
+            state: absent
+            mode: "u=rw,g=r,o=r"
+        ignore_errors: True
+        tags: 
+            - reset
+            - forcereset
+
+      - name : put-config
+        template: src={{ srcbasedir }}/conf/filebeat.cfg/{{ansible_ssh_host}}.yml dest={{aghome}}/{{ansible_ssh_user}}/bimap/conf mode=0444
+        tags:
+            - restart
+
+      - name : startfb
+        shell : "{{aghome}}/{{ansible_ssh_user}}/bimap/bin/filebeat_init.sh start"
+        #shell : /home/appmon/bimap/bin/filebeat_init.sh start
+        async: 10
+        poll: 5
+        tags:
+            - restart

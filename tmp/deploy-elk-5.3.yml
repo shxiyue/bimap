@@ -1,0 +1,123 @@
+---
+#ipoc自动部署配置,elk
+#wudi 20170216
+- hosts: elk
+  #gather_facts: False
+  vars:
+        srcbasedir: "/data/ipoc/bitmap"
+        desthomedir: "/home/bimap/bimap" 
+        elkVersion: "5.3.0"
+        esVersion: "5.3.0"
+        logstashVersion: "5.3.0"
+        kibanaVersion: "5.3.0"
+        kafkaVersion: "2.12-0.10.2.0"
+        jdkVersion: "1.8.0_111"
+        nodeVersion: "v6.10.2"
+        redisVersion: "3.2.7"
+        killnmon: True  #是否kill已有的nmon进程
+        startnmon: True  #是否立即启动nmon捕获数据到当天24点
+  remote_user: bitmap
+  tasks:
+      - name : create-dir
+        file : path={{item}} state=directory mode=0755
+        with_items:
+                - "{{ desthomedir }}"
+                - "{{ desthomedir }}/opt"
+                - "{{ desthomedir }}/conf"
+                - "{{ desthomedir }}/depkit"
+                - "{{ desthomedir }}/logs"
+                - "{{ desthomedir }}/data"
+                - "{{ desthomedir }}/data/es"
+                - "{{ desthomedir }}/run"
+                - "{{ desthomedir }}/bin"
+        tags:
+            - createdir
+
+      - name : put-kit
+        copy: src={{ srcbasedir }}/depkit/{{item}}.tar.gz dest={{ desthomedir }}/depkit mode="u=rwx"
+        with_items:
+                - "jdk-{{jdkVersion}}"
+                - "kafka-{{kafkaVersion}}"
+                - "elasticsearch-{{esVersion}}"
+                - "kibana-{{kibanaVersion}}"
+                - "logstash-{{logstashVersion}}"
+                - "node-{{nodeVersion}}"
+                - "elasticsearch-head"
+        #when: logstash or elasticsearch or kibana
+        tags:
+            - putkit
+
+      - name : unzip
+        command : tar -zxf {{desthomedir}}/depkit/{{item}}.tar.gz -C {{desthomedir}}/opt
+        with_items:
+                - "jdk-{{jdkVersion}}"
+                - "kafka-{{kafkaVersion}}"
+                - "elasticsearch-{{esVersion}}"
+                - "kibana-{{kibanaVersion}}"
+                - "logstash-{{logstashVersion}}"
+                - "node-{{nodeVersion}}"
+                - "elasticsearch-head"
+        #when: logstash or elasticsearch or kibana
+
+      - name : put-config
+        template: src={{ srcbasedir }}/depscript/{{item.file}} dest={{desthomedir}}/{{item.dir}} mode=0755
+        with_items:
+                - { file: 'elasticsearch.yml', dir: 'opt/elasticsearch-{{elkVersion}}/config' }
+                - { file: 'elasticsearch',     dir: 'opt/elasticsearch-{{elkVersion}}/bin' }
+                - { file: 'es_init_script',    dir: 'bin' }
+                - { file: 'kibana.yml',        dir: 'opt/kibana-{{elkVersion}}/config' }
+                - { file: 'setbimapenv.sh',    dir: 'bin' }
+                - { file: 'kibana_init_script',dir: 'bin' }
+                - { file: 'eshead_start.sh',   dir: 'bin' }
+                - { file: 'Gruntfile.js',      dir: 'opt/elasticsearch-head' }
+
+        # when: elasticsearch
+
+      - name : adconfig
+        template: src={{ srcbasedir }}/depscript/{{item.file}} dest={{desthomedir}}/{{item.dir}} mode=0755
+        with_items:
+                - { file: 'schema.js', dir: 'opt/kibana-{{elkVersion}}/src/server/config' }
+        tags:
+            - option
+
+#--------------start redis config --------------------------------                  
+      - name : put-redis
+        copy: src={{ srcbasedir }}/depkit/{{item}}.tar.gz dest={{ desthomedir }}/depkit mode="u=rwx"
+        with_items:
+                - "redis-{{redisVersion}}"
+        when: 
+                - redis
+                - (ansible_distribution == 'RedHat' or ansible_distribution == 'CentOS') and ansible_distribution_major_version == "7"
+        tags:
+            - redis
+
+      - name : unzip-redis
+        command : tar -zxf {{desthomedir}}/depkit/{{item}}.tar.gz -C {{desthomedir}}/opt
+        with_items:
+                - "redis-{{redisVersion}}"
+        when : redis
+        tags:
+            - redis
+
+
+      - name : make-redis
+        make:
+          chdir: "{{desthomedir}}/opt/redis-{{redisVersion}}"
+        when : redis
+        tags:
+            - redis
+
+      - name : copy-redis-conf
+        template: src={{ srcbasedir }}/depscript/redis.conf dest={{desthomedir}}/conf/redis_{{redisport}}.conf mode="u=rwx"
+        when : redis
+        tags:
+            - redis
+
+
+      - name : copy-redis-init
+        template: src={{ srcbasedir }}/depscript/redis_init_script dest={{desthomedir}}/bin/init_redis mode=0755
+        #become : true
+        #become_method: su
+        #when : redis
+        tags:
+            - redis

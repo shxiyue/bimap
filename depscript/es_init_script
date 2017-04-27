@@ -1,0 +1,67 @@
+#!/bin/bash  
+# chkconfig: 2345 10 90  
+# description: Elasticsearch Service ....  
+  
+ES_HOME={{homedir}}/{{bimapuser}}/bimap/opt/elasticsearch-{{elkVersion}}
+EXEC_PATH=$ES_HOME  
+EXEC=elasticsearch  
+DAEMON=$EXEC_PATH/bin/$EXEC  
+PID_FILE={{homedir}}/{{bimapuser}}/bimap/run/es.pid  
+ServiceName='Elasticsearch {{elkVersion}}'  
+JAVA_HOME={{homedir}}/{{bimapuser}}/bimap/opt/jdk-{{jdkVersion}}
+  
+. /etc/rc.d/init.d/functions  
+  
+if [ ! -x $DAEMON ] ; then  
+       echo "ERROR: $DAEMON not found"  
+       exit 1  
+fi  
+  
+stop()  
+{  
+       echo "Stoping $ServiceName ..."  
+       #ps aux | grep "$DAEMON" | kill -9 `awk '{print $2}'` >/dev/null 2>&1  
+       cat $PID_FILE | xargs kill
+       rm -f $PID_FILE  
+       usleep 100  
+       echo "Shutting down $ServiceName: [  successful  ]"  
+}  
+  
+start()  
+{  
+       echo "Starting $ServiceName ..."  
+       $DAEMON > /dev/null &  
+       sleep 5
+       echo $PATH
+       #pidof $EXEC > $PID_FILE  
+       PID=`$JAVA_HOME/bin/jps | grep -i  elasticsearch | grep -v grep | awk '{print $1}'` 
+       echo $PID> $PID_FILE
+
+       usleep 100  
+       echo "Starting $ServiceName: [  successful  ]; pid is : $PID"  
+}  
+restart()  
+{  
+    stop  
+    start  
+}  
+  
+case "$1" in  
+    start)  
+        start  
+        ;;  
+    stop)  
+        stop  
+        ;;  
+    restart)  
+        restart  
+        ;;  
+    status)  
+        status -p $PID_FILE $DAEMON  
+        ;;  
+    *)  
+        echo "Usage: service $ServiceName {start|stop|restart|status}"  
+        exit 1  
+esac  
+  
+exit $?  

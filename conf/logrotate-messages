@@ -1,0 +1,15 @@
+/var/log/messages {
+        daily
+        rotate 7
+        dateext
+        compress
+        delaycompress
+        missingok
+        notifempty
+        create 644 root root
+        postrotate
+            /etc/init.d/xinetd reload
+            #/usr/bin/killall -HUP rsyslogd
+            chmod 644 /var/log/messages*
+        endscript
+}

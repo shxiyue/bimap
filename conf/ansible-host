@@ -1,0 +1,20 @@
+[elk]
+84.239.97.141
+84.239.97.142
+
+[opf]
+84.238.29.161
+
+[filebeat:children]
+elk
+opf
+
+
+[filebeat:vars]
+srcbasedir="/home/bimap/bimap"
+filebeatVersion="5.3.0"
+aguser=['appmon']
+aghome="/home"
+agdirs=['bimap', 'bimap/depkit', 'bimap/bin', 'bimap/opt', 'bimap/conf', 'bimap/logs']
+ansible_ssh_user=appmon
+ansible_ssh_pass=appmon
