@@ -2,10 +2,9 @@
 84.239.97.140 esnname=node-1
 84.239.97.142 esnname=node-2
 84.239.97.141 esnname=node-3
-192.168.0.128 esnname=node-1
 
 [redis]
-192.168.0.128
+84.239.97.140 esnname=node-1
 
 [bimap:children]
 elk
@@ -15,8 +14,7 @@ redis
 esport=9500
 redisport=6379
 kibanaport=5901
-#esdiscovery=["84.239.97.140", "84.239.97.142", "84.239.97.141"]
-esdiscovery=["192.168.0.128"]
+esdiscovery=["84.239.97.140", "84.239.97.142", "84.239.97.141"]
 
 ## customer host list
 [opf]

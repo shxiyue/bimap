@@ -1,10 +1,10 @@
-#bimap 部署管理服务器使用说明
+# bimap 部署管理服务器使用说明
 
 ## 使用方法
 1. 上传所有介质到部署服务器
 2. 安装ansible
-    a. 使用yum,apt-get等安装ansible，或
-    b. 使用./depkit目录中的ansible-2.2.1.0-1.el7.noarch.rpm　for centos7安装，
+a. 使用yum,apt-get等安装ansible，或
+b. 使用./depkit目录中的ansible-2.2.1.0-1.el7.noarch.rpm　for centos7安装，
 
 ###　配置文件 hostlist
 此文件是ansible的host文件，主要定义如下：
