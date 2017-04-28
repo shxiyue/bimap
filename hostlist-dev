@@ -12,6 +12,7 @@ redis
 esport=9500
 redisport=6379
 kibanaport=5901
+headport=9100
 esdiscovery=["192.168.0.128"]
 
 ## customer host list

@@ -91,7 +91,7 @@ module.exports = function(grunt) {
 			server: {
 				options: {
                     hostname: '{{ansible_ssh_host}}',
-					port: {{esport}},
+					port: {{headport}},
 					base: '.',
 					keepalive: true
 				}
