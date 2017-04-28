@@ -1,0 +1,95 @@
+---
+#bimap change kernel parmas
+#wudi 20170216
+- hosts: bimap 
+  gather_facts: True
+  vars:
+      ansible_ssh_user: root
+      ansible_ssh_pass: 123456
+  tasks:
+      - name: addgroup
+        group:
+            name: "{{bimapuser}}"
+            state: present
+        tags:
+            - createuser
+
+      - name: add-bimap-user
+        user:
+            name: "{{bimapuser}}"
+            shell: /bin/bash
+            home: "{{ homedir }}/{{bimapuser}}"
+            group: "{{bimapuser}}"
+            password: $6$t6SqSzW8Bpi8qTSP$JCUKAyClKHI0ivTqgqJ.X6drtetADdhJKpSpMZVun5UNJJns2os4PN9SJ2wjuIKOfTtbtSIA5NYltZwvZIcGc/
+        tags:
+            - createuser
+
+      - name: sudo-config
+        lineinfile: 
+            path: /etc/sudoers 
+            regexp: "^bimap"
+            line: "bimap ALL=(ALL) NOPASSWD:ALL"
+        become: true
+        tags:
+            - kernelparam
+
+      - name: set-limit
+        lineinfile: path=/etc/security/limits.conf regexp="^bimap soft nofile" line="bimap soft nofile 65536"
+        become: true
+        tags:
+            - kernelparam
+
+      - name: set-limit
+        lineinfile: path=/etc/security/limits.conf regexp="^bimap hard nofile" line="bimap hard nofile 65536"
+        tags:
+            - kernelparam
+          
+      - name: proclimit
+        pam_limits:
+            domain: bimap
+            limit_type: soft
+            limit_item: nproc
+            value: 4096
+            dest: /etc/security/limits.conf
+        tags:
+            - kernelparam
+
+      - name: proclimit
+        pam_limits:
+            domain: bimap
+            limit_type: hard
+            limit_item: nproc
+            value: 4096
+            dest: /etc/security/limits.conf
+        tags:
+            - kernelparam
+
+      - name: proclimit
+        pam_limits:
+            domain: bimap
+            limit_type: soft
+            limit_item: nproc
+            value: 4096
+            dest: /etc/security/limits.d/90-nproc.conf
+        tags:
+            - kernelparam
+
+      - name: proclimit
+        pam_limits:
+            domain: bimap
+            limit_type: hard
+            limit_item: nproc
+            value: 4096
+            dest: /etc/security/limits.d/90-nproc.conf
+        tags:
+            - kernelparam
+
+      - name : vm_map_map_count
+        sysctl:
+            name: vm.max_map_count
+            value: 262144
+            state: present
+            reload: yes
+        become: true
+        tags:
+            - kernelparam

@@ -99,6 +99,8 @@
       - name : make-redis
         make:
           chdir: "{{homedir}}/{{bimapuser}}/bimap/opt/redis-{{redisVersion}}"
+          params:
+              MALLOC: libc
         when :
                 - "'redis' in group_names"
         tags:

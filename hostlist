@@ -36,7 +36,7 @@ dirs=['bimap', 'bimap/depkit', 'bimap/bin', 'bimap/opt', 'bimap/conf', 'bimap/lo
 # user def
 bimapuser=bimap
 homedir="/home"
-ansible_ssh_user=bimap
+ansible_ssh_user=root
 ansible_ssh_pass=123456
 
 #version def
