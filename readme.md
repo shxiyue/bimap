@@ -52,3 +52,5 @@ Usage:scan-redis.py -c <count> -t <waittime> -h <redisServer> -p <port>
 
 
 未完待续
+
+abc
