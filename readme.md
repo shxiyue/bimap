@@ -49,10 +49,3 @@ Usage:scan-redis.py -c <count> -t <waittime> -h <redisServer> -p <port>
 
 ## fb-cfgen
 根据配置文件动态生成多台主机的filebeat配置文件
-
-
-未完待续
-
-
-
-123456
