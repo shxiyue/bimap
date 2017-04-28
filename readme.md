@@ -21,3 +21,31 @@
     - ansible_ssh_user 部署连接使用用户
     - ansible_ssh_pass
     - someVersion,各种组件的版本定义
+
+## base-deploy.yml
+
+usage:ansible-playbook -i hostlist base-deploy.yml
+使用root用户，在目标机器
+- create bimap user
+- add bimap user to sudo list
+- change system kernel parmas
+
+## deploy.yml
+ELK集群部署脚本
+
+usage: ansible-playbook -i hostlist deploy.yml
+功能:
+- create bimap dirs
+- put install kit(elasticsearch,kibana,logstash),and unzip
+- put some config
+- put redis and make
+
+
+# tools说明
+
+## scan-redis.py
+Usage:scan-redis.py -c <count> -t <waittime> -h <redisServer> -p <port>
+说明：循环监控redis keys大小
+
+## fb-cfgen
+根据配置文件动态生成多台主机的filebeat配置文件
