@@ -1,0 +1,46 @@
+[elk]
+192.168.0.128 esnname=node-1
+
+[redis]
+192.168.0.128
+
+[bimap:children]
+elk
+redis
+
+[bimap:vars]
+esport=9500
+redisport=6379
+kibanaport=5901
+esdiscovery=["84.239.97.140", "84.239.97.142", "84.239.97.141"]
+
+## customer host list
+[opf]
+84.238.29.161
+
+
+## filebeat group
+[filebeat:children]
+opf
+
+[filebeat:vars]
+
+[all:vars]
+## dir def
+srcbasedir="./"
+#desthomedir="/home/bimap/bimap" 
+dirs=['bimap', 'bimap/depkit', 'bimap/bin', 'bimap/opt', 'bimap/conf', 'bimap/logs', 'bimap/data', 'bimap/data/es', 'bimap/run']
+
+# user def
+bimapuser=bimap
+homedir="/home"
+ansible_ssh_user=bimap
+ansible_ssh_pass=123456
+
+#version def
+elkVersion="5.3.0"
+kafkaVersion="2.12-0.10.2.0"
+jdkVersion="1.8.0_111"
+nodeVersion="v6.10.2"
+redisVersion="3.2.7"
+filebeatVersion="5.3.0"

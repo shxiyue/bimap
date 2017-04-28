@@ -2,7 +2,7 @@
 #bimap自动部署配置,elk
 #wudi 20170216
 - hosts: all 
-  gather_facts: False
+  #gather_facts: False
   tasks:
       - name : create-dir
         file : path="{{homedir}}/{{bimapuser}}/{{item}}" state=directory mode=0755
@@ -14,7 +14,7 @@
             - createdir
  
       - name : put-kit
-        copy: src={{ srcbasedir }}/depkit/{{item}}.tar.gz dest={{homedir}}/{{bimapuser}}/bimap/depkit mode="u=rwx"
+        copy: src={{ srcbasedir }}/depkit/{{item}}.tar.gz dest={{homedir}}/{{bimapuser}}/bimap/depkit mode="0755"
         with_items:
                 - "jdk-{{jdkVersion}}"
                 - "elasticsearch-{{elkVersion}}"
