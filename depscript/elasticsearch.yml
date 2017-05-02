@@ -92,4 +92,4 @@ discovery.zen.ping.unicast.hosts: {{esdiscovery}}
 http.cors.enabled: true
 http.cors.allow-origin: "*"
 #need change bootstrap.system_call_filter to false with centos6
-#bootstrap.system_call_filter: false
+bootstrap.system_call_filter: false
