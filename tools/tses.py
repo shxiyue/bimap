@@ -2,7 +2,7 @@
 # -*- coding: UTF-8 -*-
 
 from elasticsearch import Elasticsearch
-import sys 
+import sys
 import time
 import getopt
 
