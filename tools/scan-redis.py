@@ -5,6 +5,7 @@ import redis
 import sys
 import time
 import getopt
+# need install redis--  pip install redis
 
 def usage():
     print ("Usage:%s -c <count> -t <waittime> -h <redisServer> -p <port> " % (sys.argv[0]))
@@ -13,14 +14,17 @@ def scanRedis(server,port):
     pass
 
 def loopscan(count,wtime,server,port):
-    r = redis.Redis(host=server,port=port, db=0)
-    for i in range(count):
-        keylist = r.keys()
-        ds = r.dbsize()
-        for k in r.keys():
-            print ds, k, r.llen(k)
-        #scanRedis(server,port)
-        time.sleep(wtime)
+    try:
+        r = redis.Redis(host=server,port=port, db=0)
+        for i in range(count):
+            keylist = r.keys()
+            ds = r.dbsize()
+            for k in r.keys():
+                print ds, k, r.llen(k)
+            #scanRedis(server,port)
+            time.sleep(wtime)
+    except Exception, e:
+        print str(e)
 
 
 def main(argv):
