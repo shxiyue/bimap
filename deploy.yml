@@ -64,7 +64,7 @@
         template : src={{srcbasedir}}/depscript/{{item.srcfile}} dest={{homedir}}/{{bimapuser}}/bimap/{{item.dir}}/{{item.tgtfile}} mode=0755
         with_items :
             - { srcfile: 'es_jvm.options', dir: 'opt/elasticsearch-{{elkVersion}}/config', tgtfile: 'jvm.options' }
-            - { srcfile: 'logstash_jvm.options', dir: 'logstash-{{elkVersion}}/config', tgtfile: 'jvm.options' }
+            - { srcfile: 'logstash_jvm.options', dir: 'opt/logstash-{{elkVersion}}/config', tgtfile: 'jvm.options' }
         tags:
             - copy-elk-config
      
