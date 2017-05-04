@@ -16,8 +16,10 @@ redisport=6379
 headport=9100
 kibanaport=5901
 esdiscovery=["84.239.97.140", "84.239.97.142", "84.239.97.141"]
+## elasticsearch jvm.options
 es_jvmmin="-Xms2g"
 es_jvmmax="-Xmx2g"
+## logstash jvm.options
 ls_jvmmin="-Xms2g"
 ls_jvmmax="-Xmx2g"
 
