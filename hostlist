@@ -16,8 +16,10 @@ redisport=6379
 headport=9100
 kibanaport=5901
 esdiscovery=["84.239.97.140", "84.239.97.142", "84.239.97.141"]
-jvmmin="-Xms2g"
-jvmmax="-Xmx2g"
+es_jvmmin="-Xms2g"
+es_jvmmax="-Xmx2g"
+ls_jvmmin="-Xms2g"
+ls_jvmmax="-Xmx2g"
 
 ## customer host list
 [opf]
