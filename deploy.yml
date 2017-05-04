@@ -42,7 +42,7 @@
         when:
             - "'elk' in group_names"
 
-      - name : upload-config
+      - name : copy-elk-config
         template : src={{srcbasedir}}/depscript/{{item.file}} dest={{homedir}}/{{bimapuser}}/bimap/{{item.dir}} mode=0755
         with_items:
             - { file: 'elasticsearch.yml', dir: 'opt/elasticsearch-{{elkVersion}}/config' }
@@ -54,8 +54,20 @@
             - { file: 'eshead_start.sh',   dir: 'bin' }
             - { file: 'Gruntfile.js',      dir: 'opt/elasticsearch-head' }
             - { file: 'schema.js',         dir: 'opt/kibana-{{elkVersion}}/src/server/config' }
+            - { file: 'app.js',            dir: 'opt/elasticsearch-head/_site' }
         when:
             - "'elk' in group_names"
+        tags:
+            - copy-elk-config
+
+      - name : copy-jvm-options
+        template : src={{srcbasedir}}/depscript/{{item.srcfile}} dest={{homedir}}/{{bimapuser}}/bimap/{{item.dir}}/{{item.tgtfile}} mode=0755
+        with_items :
+            - { srcfile: 'es_jvm.options', dir: 'opt/elasticsearch-{{elkVersion}}/config', tgtfile: 'jvm.options' }
+            - { srcfile: 'logstash_jvm.options', dir: 'opt/logstash-{{elkVersion}}/config', tgtfile: 'jvm.options' }
+        tags:
+            - copy-elk-config
+     
 
 #--------------start redis config --------------------------------                        
       - name : put-redis
