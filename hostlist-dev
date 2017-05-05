@@ -14,6 +14,12 @@ redisport=6379
 kibanaport=5901
 headport=9100
 esdiscovery=["192.168.0.128"]
+## elasticsearch jvm.options
+es_jvmmin="-Xms2g"
+es_jvmmax="-Xmx2g"
+## logstash jvm.options
+ls_jvmmin="-Xms2g"
+ls_jvmmax="-Xmx2g"
 
 ## customer host list
 
