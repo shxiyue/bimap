@@ -16,6 +16,12 @@ redisport=6379
 headport=9100
 kibanaport=5901
 esdiscovery=["84.239.97.140", "84.239.97.142", "84.239.97.141"]
+## elasticsearch jvm.options
+es_jvmmin="-Xms2g"
+es_jvmmax="-Xmx2g"
+## logstash jvm.options
+ls_jvmmin="-Xms2g"
+ls_jvmmax="-Xmx2g"
 
 ## customer host list
 [opf]
@@ -32,7 +38,7 @@ opf
 ## dir def
 srcbasedir="./"
 #desthomedir="/home/bimap/bimap" 
-dirs=['bimap', 'bimap/depkit', 'bimap/bin', 'bimap/opt', 'bimap/conf', 'bimap/logs', 'bimap/data', 'bimap/data/es', 'bimap/run']
+dirs=['bimap', 'bimap/depkit', 'bimap/bin', 'bimap/opt', 'bimap/conf', 'bimap/logs', 'bimap/data', 'bimap/data/es', 'bimap/data/redis', 'bimap/run']
 
 # user def
 bimapuser=bimap
@@ -46,4 +52,4 @@ kafkaVersion="2.12-0.10.2.0"
 jdkVersion="1.8.0_111"
 nodeVersion="v6.10.2"
 redisVersion="3.2.7"
-filebeatVersion="5.3.0"
+

@@ -21,3 +21,7 @@ program-version
 - PyYAML-3.12.tar.gz
 - readme.md
 - redis-3.2.7.tar.gz
+
+可以在下述链接下载对应kit:
+链接: https://pan.baidu.com/s/1gfGFVaz 密码: k34f
+
