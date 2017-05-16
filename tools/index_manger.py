@@ -13,11 +13,21 @@ def mkdir(path):
     os.mkdir(path)
 
 
-def archiveindex():
-    eshost = ["84.239.97.140","84.239.97.141","84.239.97.142"]
-    esport = 9500
+def archiveindex(args):
+    eshost = args.host.split(',')
+    esport = args.port
+    #eshost = ["84.239.97.140","84.239.97.141","84.239.97.142"]
+    #esport = 9500
     esm = esagg(eshost,esport=esport)
     cfg = esm.readConfig(type='archivesetting')
+    if args.view:
+        for c in cfg:
+            print '%s\t%s\t%d'\
+            %(c['_source']['indexpattern'],c['_source']['method'],c['_source']['keep'])
+
+    if not args.do:
+        return
+
     for c in cfg:
         list = esm.getindex(c['_source']['indexpattern'])
         idxlist=list[:-c['_source']['keep']]
@@ -60,28 +70,67 @@ def archiveindex():
                 esm.delIndex(idx)
                 print '%s  is delete' % (idx)
 
-def test():
-    eshost = ["84.239.97.140","84.239.97.141","84.239.97.142"]
-    esport = 9500
-    esm = esagg(eshost,esport=esport)
-    #esm.exportIndex('bimap-sa-vmware-2017.05.11','aa.json')
-    esm.zipFile('aa.json')
-    #esm.importIndex('aa.json')
-#archiveindex()
+def export(args):
+    eshost = args.host.split(',')
+    print eshost
+    esport = int(args.port)
+    idx = args.index
+    type = args.type
+    fsize = args.filerow
+    output = args.output
 
+    esm = esagg(eshost,esport=esport)
+    eflist = esm.exportIndex(idx,output,fsize,type)
+    print 'export %s to %s is finish' %(idx,output)
+    if args.tar:
+        esm.tarfiles(eflist,output+'.tar.gz')
+        for f in eflist:
+            os.remove(f)
+
+
+def importFiles(args):
+    eshost = args.host.split(',')
+    esport = int(args.port)
+    file = args.file
+    esm = esagg(eshost,esport=esport)
+    esm.loadFiles(file)
+    print '%s is load to ES' %(file)
 
 
 def main():
+    # create the top-level parser
+    # 公共连接参数，并设置默认值
     parser = argparse.ArgumentParser()
-    parser.add_argument("-a", "--archive", help="archive index by config", action="store_true")
-    parser.add_argument("-e", "--export", help="export elasticsearch index", action="store_true")
-    parser.add_argument("-l", "--load", help="load files to es index", action="store_true")
+    parser.add_argument('-host', default="84.239.97.140,84.239.97.141,84.239.97.142", help='elasticsearch host')
+    parser.add_argument('-port', default=9500,type=int, help='elasticsearch port')
 
+    #添加子命令
+    subparsers = parser.add_subparsers(title="subcommands",description="valid subcommands",help='sub-command help')
+    # create the parser for the "archive" command
+    # 归档
+    parser_a = subparsers.add_parser('archive', help='archive help')
+    parser_a.add_argument('-do',action='store_true',help='exec archive')
+    parser_a.add_argument('-view',action='store_true',help='view archive config')
+    parser_a.set_defaults(func=archiveindex)
+
+    #export 设置
+    # create the parser for the "export" command
+    parser_b = subparsers.add_parser('export', help='export help')
+    parser_b.add_argument('-index', required=True, help='elasticsearch index pattern')
+    parser_b.add_argument('-type',  default=None,help='elasticsearch type,if not set ,return all type')
+    parser_b.add_argument('-filerow',  default=50000,type=int,help='number rows per file,default is 50000')
+    parser_b.add_argument('-output',  default='./export.json',help='output file name,default is export.json')
+    parser_b.add_argument('-tar', action='store_true',default=False,help='defautl is close')
+    parser_b.set_defaults(func=export)
+
+    # create the parser for the "import" command
+    parser_c = subparsers.add_parser('import', help='import help')
+    parser_c.add_argument('-file', required=True, help='files')
+    parser_c.set_defaults(func=importFiles)
     args = parser.parse_args()
-    if args.archive:
-        print 'start archive index'
-        archiveindex()
-        print "archive index fiinish" 
+
+    args.func(args)
 
 if __name__ == "__main__":
     main()
+

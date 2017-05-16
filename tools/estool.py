@@ -101,7 +101,7 @@ class esagg:
         dstfiles=[]
         qbody={ "query": { "match_all": {} } }
         res = self.__es.search(index=index,doc_type=type,body=
-                               qbody,scroll='1m',size=1000)
+                               qbody,scroll='1m',size=10000)
         sid = res['_scroll_id']
         scroll_size = res['hits']['total']
         i = 0
