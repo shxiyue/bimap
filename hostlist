@@ -4,7 +4,9 @@
 84.239.97.141 esnname=node-3
 
 [redis]
-84.239.97.140
+#84.239.97.140
+84.239.97.141
+84.239.97.142
 
 [bimap:children]
 elk
@@ -25,7 +27,7 @@ ls_jvmmax="-Xmx2g"
 
 ## customer host list
 [opf]
-84.238.29.161
+84.238.29.161 bimapuser=appmon ansible_ssh_user=appmon
 
 
 ## filebeat group
