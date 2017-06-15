@@ -21,7 +21,7 @@ def readFile2ES(fname,eshost,esport):
     es = Elasticsearch(eshost,port =esport, maxsize = 5)
     actions = []
     f = open(fname,'rU')
-    buffsize = 1000
+    buffsize = 10000
     i = 0
     while 1:
         line = f.readline()
@@ -29,7 +29,7 @@ def readFile2ES(fname,eshost,esport):
             dt=json.loads(line)
             actions.append(dt)
             i += 1
-            if i>= buffsize:
+            if i== buffsize:
                 helpers.bulk(es,actions)
                 i = 0
                 del actions[:]
@@ -95,6 +95,49 @@ class esagg:
             scroll_size = len(res['hits']['hits'])
         return cfglist
 
+
+    def readByTimeRange(self,index,starttime,dtrange,type=None):
+        searchres=[]
+        endtime  = '%s||%s' %(starttime,dtrange)
+        qbody= {"query": {
+                  "range": {
+                    "logtime":{ "gt": starttime,
+                                "lt": endtime,
+                                "format": "yyyy-MM-dd HH:mm:ss"
+                     }
+                   }
+                 }
+                 , "sort": [ { "logtime": { "order": "asc" } } ]
+        }
+        res = self.__es.search(index=index,doc_type=type,body=
+                               qbody,scroll='1m',size=10000)
+        sid = res['_scroll_id']
+        scroll_size = res['hits']['total']
+        while (scroll_size > 0 ):
+            for hit in res['hits']['hits']:
+                searchres.append(hit)
+            res = self.__es.scroll(scroll_id=sid,scroll='1m')
+            sid = res['_scroll_id']
+            scroll_size = len(res['hits']['hits'])
+        return searchres
+
+    def readByQuery(self,index,qbody,type=None):
+        searchres=[]
+        #qbody= {"query": {
+        #          "match_all": {}
+        #         }
+        #}
+        res = self.__es.search(index=index,doc_type=type,body=
+                               qbody,scroll='1m',size=10000)
+        sid = res['_scroll_id']
+        scroll_size = res['hits']['total']
+        while (scroll_size > 0 ):
+            for hit in res['hits']['hits']:
+                searchres.append(hit)
+            res = self.__es.scroll(scroll_id=sid,scroll='1m')
+            sid = res['_scroll_id']
+            scroll_size = len(res['hits']['hits'])
+        return searchres
 
     def exportIndex(self,index,fname,filesize=50000,type=None):
         """export index数据到文件"""

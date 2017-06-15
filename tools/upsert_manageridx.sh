@@ -24,6 +24,8 @@ type=archivesetting
 # 删除类归档
 curl -XPOST ${baseurl}/${index}/${type}${pt} -d '{"indexpattern":"bimap-was*","method":"delete" ,"backupPath":"/data/backupindex",          "keep":7,"memo":""}'     
 curl -XPOST ${baseurl}/${index}/${type}${pt} -d '{"indexpattern":"bimap-vmware-*","method":"delete", "backupPath":"/data/backupindex",   "keep":1,"memo":""}'     
+curl -XPOST ${baseurl}/${index}/${type}${pt} -d '{"indexpattern":"bimap-sa-was-*","method":"delete", "backupPath":"/data/backupindex",   "keep":7,"memo":""}'     
+curl -XPOST ${baseurl}/${index}/${type}${pt} -d '{"indexpattern":"bimap-sa-vmware-*","method":"delete", "backupPath":"/data/backupindex",   "keep":7,"memo":""}'     
 #汇总类归档
 
 curl -XPOST ${baseurl}/${index}/${type}${pt} -d '
@@ -96,7 +98,7 @@ curl -XPOST ${baseurl}/${index}/${type}${pt} -d '
       }
     }
   },
-  "targetidx": "bimap-test-asa",
+  "targetidx": "bimap-agg-asa",
   "targettype": "aggasa"
 }'
 #{"indexpattern":"bimap-sa-asa*","method":"agg", "targetidx":"bimap-test-asa","keep":2,"addfield":{"bimap_hostname":"84.238.4.133","bimap_hostip":"84.238.4.133"},"logtime":"srcidx","memo":"",
